@@ -1,3 +1,7 @@
+"""
+A StorPool Juju charms helper module that keeps track of peer units of
+the same charm so that the state may be reported to other charms.
+"""
 import json
 import platform
 
@@ -8,6 +12,11 @@ from charmhelpers.core import hookenv, unitdata
 
 
 def init_state(db):
+    """
+    Initialize the local state: the current node itself is present, and
+    if the OpenStack integration has found a Cinder installation in an LXD,
+    that one is present, too.
+    """
     local_state = {
                    platform.node(): True,
                   }
@@ -21,6 +30,9 @@ def init_state(db):
 
 
 def get_state(db=None):
+    """
+    Fetch the cached state or, if none, initialize it anew.
+    """
     if db is None:
         db = unitdata.kv()
     state = db.get('storpool-service.state', default=None)
@@ -33,13 +45,21 @@ def get_state(db=None):
 
 
 def set_state(db, state):
+    """
+    Cache the current presence state in the unit's persistent storage.
+    """
     db.set('storpool-service.state', state)
 
 
 def update_state(db, state, changed, key, name, value):
+    """
+    Update the state of a single node in the database and, if it has indeed
+    been changed, store it into the persistent storage.
+    """
     if key not in state:
         state[key] = {}
         changed = True
+    # FIXME: compare with value, not with False
     if not state[key].get(name, not value):
         state[key][name] = value
         changed = True
@@ -50,6 +70,9 @@ def update_state(db, state, changed, key, name, value):
 
 
 def add_present_node(name, rel_name, rdebug=lambda s: s):
+    """
+    Update a peer's state and send the full structure right back if needed.
+    """
     db = unitdata.kv()
     (state, changed) = get_state(db)
     changed = update_state(db, state, changed, '-local', name, True)
@@ -68,6 +91,9 @@ def add_present_node(name, rel_name, rdebug=lambda s: s):
 
 
 def get_present_nodes():
+    """
+    Fetch the current state of the charm's units.
+    """
     (state, _) = get_state()
     res = {}
     for arr in state.values():
@@ -77,6 +103,9 @@ def get_present_nodes():
 
 
 def handle(hk, attaching, data, rdebug=lambda s: s):
+    """
+    Handle a state change of the internal hook; update our state if needed.
+    """
     rdebug('service_hook.handle for a {t} hook {name}, attaching {attaching}, '
            'data keys {ks}'
            .format(t=type(hk).__name__,
