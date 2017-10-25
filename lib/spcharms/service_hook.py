@@ -11,7 +11,8 @@ def init_state(db):
     local_state = {
                    platform.node(): True,
                   }
-    lxd_cinder = db.get('storpool-openstack-integration.lxd-name', default=None)
+    lxd_cinder = db.get('storpool-openstack-integration.lxd-name',
+                        default=None)
     if lxd_cinder is not None:
         local_state[lxd_cinder] = True
     return {
@@ -53,13 +54,16 @@ def add_present_node(name, rel_name, rdebug=lambda s: s):
     (state, changed) = get_state(db)
     changed = update_state(db, state, changed, '-local', name, True)
     if changed:
-        rdebug('hm, let us then try to fetch the relation ids for {rel_name}'.format(rel_name=rel_name))
+        rdebug('hm, let us then try to fetch the relation ids for {rel_name}'
+               .format(rel_name=rel_name))
         rel_ids = hookenv.relation_ids(rel_name)
         rdebug('rel_ids: {rel_ids}'.format(rel_ids=rel_ids))
         for rel_id in rel_ids:
             rdebug('- trying for {rel_id}'.format(rel_id=rel_id))
-            hookenv.relation_set(rel_id, storpool_service=json.dumps(state['-local']))
-            rdebug('  - looks like we managed it for {rel_id}'.format(rel_id=rel_id))
+            hookenv.relation_set(rel_id,
+                                 storpool_service=json.dumps(state['-local']))
+            rdebug('  - looks like we managed it for {rel_id}'
+                   .format(rel_id=rel_id))
         rdebug('that is it for the rel_ids')
 
 
@@ -73,7 +77,12 @@ def get_present_nodes():
 
 
 def handle(hk, attaching, data, rdebug=lambda s: s):
-    rdebug('service_hook.handle for a {t} hook {name}, attaching {attaching}, data keys {ks}'.format(t=type(hk).__name__, name=hk.relation_name, attaching=attaching, ks=sorted(data.keys()) if data is not None else None))
+    rdebug('service_hook.handle for a {t} hook {name}, attaching {attaching}, '
+           'data keys {ks}'
+           .format(t=type(hk).__name__,
+                   name=hk.relation_name,
+                   attaching=attaching,
+                   ks=sorted(data.keys()) if data is not None else None))
     db = unitdata.kv()
     (state, changed) = get_state(db)
     rdebug('- current state: {state}'.format(state=state))
@@ -84,22 +93,27 @@ def handle(hk, attaching, data, rdebug=lambda s: s):
     if attaching:
         rdebug('- attaching: adding new hosts as reported')
         for (name, value) in data.items():
-            rdebug('  - processing name "{name}" value "{value}"'.format(name=name, value=value))
-            changed = update_state(db, state, changed, key, name, value) or changed
+            rdebug('  - processing name "{name}" value "{value}"'
+                   .format(name=name, value=value))
+            if update_state(db, state, changed, key, name, value):
+                changed = True
             rdebug('    - changed: {changed}'.format(changed=changed))
     else:
         if key in state:
-            rdebug('- detaching: the conversation has been recorded, removing it')
+            rdebug('- detaching: the conversation has been recorded, '
+                   'removing it')
             del state[key]
             changed = True
             set_state(db, state)
         else:
-            rdebug('- detaching, but we had no idea we were having this conversation, so nah')
+            rdebug('- detaching, but we had no idea we were having '
+                   'this conversation, so nah')
 
     if changed:
         rdebug('- updated state: {state}'.format(state=state))
 
-    if changed or helpers.data_changed('storpool-service.state', state) or not helpers.is_state('storpool-service.changed'):
+    if changed or helpers.data_changed('storpool-service.state', state) or \
+       not helpers.is_state('storpool-service.changed'):
         rdebug('- something changed, notifying whomever should care')
         reactive.set_state('storpool-service.change')
     return changed
