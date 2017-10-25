@@ -8,14 +8,18 @@ from charmhelpers.core import hookenv, unitdata
 
 
 def init_state(db):
-    local_state = { platform.node(): True, }
+    local_state = {
+                   platform.node(): True,
+                  }
     lxd_cinder = db.get('storpool-openstack-integration.lxd-name', default=None)
     if lxd_cinder is not None:
         local_state[lxd_cinder] = True
-    return { '-local': local_state, }
+    return {
+            '-local': local_state,
+           }
 
 
-def get_state(db = None):
+def get_state(db=None):
     if db is None:
         db = unitdata.kv()
     state = db.get('storpool-service.state', default=None)
