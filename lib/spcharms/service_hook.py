@@ -6,12 +6,14 @@ from charms.reactive import helpers
 
 from charmhelpers.core import hookenv, unitdata
 
+
 def init_state(db):
     local_state = { platform.node(): True, }
     lxd_cinder = db.get('storpool-openstack-integration.lxd-name', default=None)
     if lxd_cinder is not None:
         local_state[lxd_cinder] = True
     return { '-local': local_state, }
+
 
 def get_state(db = None):
     if db is None:
@@ -24,8 +26,10 @@ def get_state(db = None):
         changed = False
     return (state, changed)
 
+
 def set_state(db, state):
     db.set('storpool-service.state', state)
+
 
 def update_state(db, state, changed, key, name, value):
     if key not in state:
@@ -38,6 +42,7 @@ def update_state(db, state, changed, key, name, value):
     if changed:
         set_state(db, state)
     return changed
+
 
 def add_present_node(name, rel_name, rdebug=lambda s: s):
     db = unitdata.kv()
@@ -53,6 +58,7 @@ def add_present_node(name, rel_name, rdebug=lambda s: s):
             rdebug('  - looks like we managed it for {rel_id}'.format(rel_id=rel_id))
         rdebug('that is it for the rel_ids')
 
+
 def get_present_nodes():
     (state, _) = get_state()
     res = {}
@@ -60,6 +66,7 @@ def get_present_nodes():
         for (key, value) in arr.items():
             res[key] = value or res.get(key, False)
     return res
+
 
 def handle(hk, attaching, data, rdebug=lambda s: s):
     rdebug('service_hook.handle for a {t} hook {name}, attaching {attaching}, data keys {ks}'.format(t=type(hk).__name__, name=hk.relation_name, attaching=attaching, ks=sorted(data.keys()) if data is not None else None))
