@@ -59,8 +59,7 @@ def update_state(db, state, changed, key, name, value):
     if key not in state:
         state[key] = {}
         changed = True
-    # FIXME: compare with value, not with False
-    if not state[key].get(name, not value):
+    if state[key].get(name, not value) != value:
         state[key][name] = value
         changed = True
 
