@@ -7,7 +7,7 @@ A set of unit tests for the storpool-service layer.
 import os
 import platform
 import sys
-import testtools
+import unittest
 
 import copy
 import json
@@ -131,7 +131,7 @@ STATE_US_TWO = {
 }
 
 
-class TestStorPoolService(testtools.TestCase):
+class TestStorPoolService(unittest.TestCase):
     """
     Test various aspects of the storpool-service layer.
     """
