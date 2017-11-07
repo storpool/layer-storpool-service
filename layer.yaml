@@ -1,3 +1,0 @@
-repo: https://github.com/storpool/layer-storpool-service.git
-includes: ['layer:basic']
-exclude: ['unit_tests']

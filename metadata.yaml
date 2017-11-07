@@ -1,7 +1,0 @@
-name: layer-storpool-service
-summary: Provide utility functions for service presence checks
-maintainer: StorPool <support@storpool.com>
-description: |
-  This layer adds a couple of functions for managing the agreement of
-  several units of a StorPool service on what hostnames they are active on.
-  It works closely with the storpool-service interface.
